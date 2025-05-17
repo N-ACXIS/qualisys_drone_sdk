@@ -31,7 +31,7 @@ def pol2cart(r, phi):
     """
     x = r * math.cos(math.radians(phi))
     y = r * math.sin(math.radians(phi))
-    return(x, y)
+    return (x, y)
 
 
 def sph2cart(r, theta, phi):
@@ -54,4 +54,4 @@ def sph2cart(r, theta, phi):
     x = r * math.sin(math.radians(theta)) * math.cos(math.radians(phi))
     y = r * math.sin(math.radians(theta)) * math.sin(math.radians(phi))
     z = r * math.cos(math.radians(theta))
-    return(x, y, z)
+    return (x, y, z)

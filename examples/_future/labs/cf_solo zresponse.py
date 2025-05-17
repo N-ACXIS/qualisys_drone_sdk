@@ -4,18 +4,17 @@ qfly | Qualisys Drone SDK Example Script: Control Engineering / Step Response De
 UNSTABLE / EXPERIMENTAL / UNDER DEVELOPMENT
 """
 
-import pynput
 from time import sleep, time
 
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import pynput
 
 from qfly import Pose, QualisysCrazyflie, World
 
-
 # SETTINGS
-cf_body_name = 'E7E7E7E704'  # QTM rigid body name
-cf_uri = 'radio://0/80/2M/E7E7E7E704'  # Crazyflie address
+cf_body_name = "E7E7E7E704"  # QTM rigid body name
+cf_uri = "radio://0/80/2M/E7E7E7E704"  # Crazyflie address
 cf_marker_ids = [41, 42, 43, 44]
 
 
@@ -42,10 +41,7 @@ world = World()
 
 
 # Prepare for liftoff
-with QualisysCrazyflie(cf_body_name,
-                       cf_uri,
-                       world,
-                       marker_ids=cf_marker_ids) as qcf:
+with QualisysCrazyflie(cf_body_name, cf_uri, world, marker_ids=cf_marker_ids) as qcf:
 
     # Let there be time
     t = time()
@@ -56,7 +52,7 @@ with QualisysCrazyflie(cf_body_name,
     log = []
 
     # MAIN LOOP WITH SAFETY CHECK
-    while(qcf.is_safe()):
+    while qcf.is_safe():
 
         # Terminate upon Esc command
         if last_key_pressed == pynput.keyboard.Key.esc:
@@ -70,7 +66,7 @@ with QualisysCrazyflie(cf_body_name,
 
         # Take off and hover in the center of safe airspace for 5 seconds
         if dt < 20:
-            print(f'[t={int(dt)}] Ascending...')
+            print(f"[t={int(dt)}] Ascending...")
             qcf.rise_in_place()
             continue
 
@@ -86,7 +82,7 @@ with QualisysCrazyflie(cf_body_name,
         # if dt < 60:
         #     qcf.land_in_place()
         #     continue
-        
+
         # if dt < 80:
         #     print(f'[t={int(dt)}] Ascending...')
         #     qcf.rise_in_place(0.4)

@@ -1,8 +1,8 @@
 import asyncio
 import math
 import os
-from threading import Thread
 import xml.etree.cElementTree as ET
+from threading import Thread
 
 import qtm
 
@@ -13,7 +13,7 @@ class QtmWrapper(Thread):
     """
     Wrapper for opening and running an asynchronous QTM connection
     that receives and responds to real time data packets.
-    
+
     Designed for real time interactive applications, e.g. drone control.
     Each entity being tracked should:
     1) instantiate its own QtmWrapper,
@@ -60,7 +60,7 @@ class QtmWrapper(Thread):
         QTM wrapper coroutine.
         """
         await self._connect()
-        while(self._stay_open):
+        while self._stay_open:
             await asyncio.sleep(1)
         await self._close()
 
@@ -69,7 +69,7 @@ class QtmWrapper(Thread):
         Connect to QTM machine.
         """
         # Establish connection
-        print('[QTM] Connecting to QTM at ' + self.qtm_ip)
+        print("[QTM] Connecting to QTM at " + self.qtm_ip)
         self._connection = await qtm.connect(self.qtm_ip)
 
         # Quit if QTM unavailable
@@ -78,13 +78,12 @@ class QtmWrapper(Thread):
             os._exit(1)
 
         # Register index of body for 6D tracking
-        params_xml = await self._connection.get_parameters(parameters=['6d'])
+        params_xml = await self._connection.get_parameters(parameters=["6d"])
         xml = ET.fromstring(params_xml)
         for index, body in enumerate(xml.findall("*/Body/Name")):
             if body.text.strip() == self.body:
                 self._body_idx = index
-                print(
-                    f'[QTM] Index for rigid body "{self.body}" is: {self._body_idx}')
+                print(f'[QTM] Index for rigid body "{self.body}" is: {self._body_idx}')
 
         # Quit if body not found
         if self._body_idx is None:
@@ -93,8 +92,9 @@ class QtmWrapper(Thread):
 
         # Assign 6D streaming callback
         try:
-            await self._connection.stream_frames(components=['6D'],
-                                                 on_packet=self._on_packet)
+            await self._connection.stream_frames(
+                components=["6D"], on_packet=self._on_packet
+            )
         except asyncio.TimeoutError:
             print("[QTM] Frame stream TimeoutError! Terminating...")
             os._exit(1)
@@ -113,7 +113,7 @@ class QtmWrapper(Thread):
 
         # Increment tracking loss if no component found
         if component_6d is None:
-            print('[QTM] Packet without 6D component! Moving on...')
+            print("[QTM] Packet without 6D component! Moving on...")
             self.tracking_loss += 1
             return
 

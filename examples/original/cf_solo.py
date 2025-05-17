@@ -5,19 +5,18 @@ Takes off, flies circles around Z, Y, X axes.
 ESC to land at any time.
 """
 
+from time import sleep, time
 
 import pynput
-from time import sleep, time
 
 from qfly import Pose, QualisysCrazyflie, World, utils
 
-
 # SETTINGS
-cf_body_name = 'Crazyflie'  # QTM rigid body name
-cf_uri = 'radio://0/80/2M/E7E7E7E7E7'  # Crazyflie address
-cf_marker_ids = [1, 2, 3, 4] # Active marker IDs
-circle_radius = 0.5 # Radius of the circular flight path
-circle_speed_factor = 0.12 # How fast the Crazyflie should move along circle
+cf_body_name = "Crazyflie"  # QTM rigid body name
+cf_uri = "radio://0/80/2M/E7E7E7E7E7"  # Crazyflie address
+cf_marker_ids = [1, 2, 3, 4]  # Active marker IDs
+circle_radius = 0.5  # Radius of the circular flight path
+circle_speed_factor = 0.12  # How fast the Crazyflie should move along circle
 
 
 # Watch key presses with a global variable
@@ -43,10 +42,7 @@ world = World()
 
 
 # Prepare for liftoff
-with QualisysCrazyflie(cf_body_name,
-                       cf_uri,
-                       world,
-                       marker_ids=cf_marker_ids) as qcf:
+with QualisysCrazyflie(cf_body_name, cf_uri, world, marker_ids=cf_marker_ids) as qcf:
 
     # Let there be time
     t = time()
@@ -55,7 +51,7 @@ with QualisysCrazyflie(cf_body_name,
     print("Beginning maneuvers...")
 
     # MAIN LOOP WITH SAFETY CHECK
-    while(qcf.is_safe()):
+    while qcf.is_safe():
 
         # Terminate upon Esc command
         if last_key_pressed == pynput.keyboard.Key.esc:
@@ -67,10 +63,9 @@ with QualisysCrazyflie(cf_body_name,
         # Calculate Crazyflie's angular position in circle, based on time
         phi = circle_speed_factor * dt * 360
 
-
         # Take off and hover in the center of safe airspace for 5 seconds
         if dt < 5:
-            print(f'[t={int(dt)}] Maneuvering - Center...')
+            print(f"[t={int(dt)}] Maneuvering - Center...")
             # Set target
             target = Pose(world.origin.x, world.origin.y, world.expanse)
             # Engage
@@ -78,18 +73,16 @@ with QualisysCrazyflie(cf_body_name,
 
         # Move out and circle around Z axis
         elif dt < 20:
-            print(f'[t={int(dt)}] Maneuvering - Circle around Z...')
+            print(f"[t={int(dt)}] Maneuvering - Circle around Z...")
             # Set target
             _x, _y = utils.pol2cart(circle_radius, phi)
-            target = Pose(world.origin.x + _x,
-                          world.origin.y + _y,
-                          world.expanse)
+            target = Pose(world.origin.x + _x, world.origin.y + _y, world.expanse)
             # Engage
             qcf.safe_position_setpoint(target)
 
         # Back to center
         elif dt < 25:
-            print(f'[t={int(dt)}] Maneuvering - Center...')
+            print(f"[t={int(dt)}] Maneuvering - Center...")
             # Set target
             target = Pose(world.origin.x, world.origin.y, world.expanse)
             # Engage
@@ -97,18 +90,16 @@ with QualisysCrazyflie(cf_body_name,
 
         # Move out and circle around Y axis
         elif dt < 40:
-            print(f'[t={int(dt)}] Maneuvering - Circle around X...')
+            print(f"[t={int(dt)}] Maneuvering - Circle around X...")
             # Set target
             _x, _z = utils.pol2cart(circle_radius, phi)
-            target = Pose(world.origin.x + _x,
-                          world.origin.y,
-                          world.expanse + _z)
+            target = Pose(world.origin.x + _x, world.origin.y, world.expanse + _z)
             # Engage
             qcf.safe_position_setpoint(target)
 
         # Back to center
         elif dt < 45:
-            print(f'[t={int(dt)}] Maneuvering - Center...')
+            print(f"[t={int(dt)}] Maneuvering - Center...")
             # Set target
             target = Pose(world.origin.x, world.origin.y, world.expanse)
             # Engage
@@ -116,18 +107,16 @@ with QualisysCrazyflie(cf_body_name,
 
         # Move and circle around X axis
         elif dt < 60:
-            print(f'[t={int(dt)}] Maneuvering - Circle around X...')
+            print(f"[t={int(dt)}] Maneuvering - Circle around X...")
             # Set target
             _y, _z = utils.pol2cart(circle_radius, phi)
-            target = Pose(world.origin.x,
-                          world.origin.y + _y,
-                          world.expanse + _z)
+            target = Pose(world.origin.x, world.origin.y + _y, world.expanse + _z)
             # Engage
             qcf.safe_position_setpoint(target)
 
         # Back to center
         elif dt < 65:
-            print(f'[t={int(dt)}] Maneuvering - Center...')
+            print(f"[t={int(dt)}] Maneuvering - Center...")
             # Set target
             target = Pose(world.origin.x, world.origin.y, world.expanse)
             # Engage
@@ -137,5 +126,5 @@ with QualisysCrazyflie(cf_body_name,
             break
 
     # Land
-    while (qcf.pose.z > 0.1):
+    while qcf.pose.z > 0.1:
         qcf.land_in_place()

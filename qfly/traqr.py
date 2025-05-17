@@ -1,5 +1,5 @@
-from threading import Thread
 import traceback
+from threading import Thread
 
 import qfly
 
@@ -16,9 +16,7 @@ class QualisysTraqr(Thread):
         Pose object keeping track of whereabouts
     """
 
-    def __init__(self,
-                 traqr_body_name,
-                 qtm_ip="127.0.0.1"):
+    def __init__(self, traqr_body_name, qtm_ip="127.0.0.1"):
         """
         Construct QualisysTraqr object
 
@@ -30,7 +28,7 @@ class QualisysTraqr(Thread):
             IP address of QTM host.
         """
 
-        print(f'[TRAQR {traqr_body_name}] Initializing...')
+        print(f"[TRAQR {traqr_body_name}] Initializing...")
 
         self.traqr_body_name = traqr_body_name
 
@@ -38,21 +36,21 @@ class QualisysTraqr(Thread):
         self.qtm = None
         self.qtm_ip = qtm_ip
 
-        print(f'[TRAQR {self.traqr_body_name}]  Connecting...')
+        print(f"[TRAQR {self.traqr_body_name}]  Connecting...")
 
     def __enter__(self):
         """
         Enter QualisysTraqr context
         """
-        print(f'[TRAQR {self.traqr_body_name}]  Setting up...')
+        print(f"[TRAQR {self.traqr_body_name}]  Setting up...")
 
         self.qtm = qfly.QtmWrapper(
-            self.traqr_body_name,
-            lambda pose: self._set_pose(pose),
-            qtm_ip=self.qtm_ip)
+            self.traqr_body_name, lambda pose: self._set_pose(pose), qtm_ip=self.qtm_ip
+        )
 
         print(
-            f'[TRAQR {self.traqr_body_name}] Connecting to QTM at {self.qtm.qtm_ip}...')
+            f"[TRAQR {self.traqr_body_name}] Connecting to QTM at {self.qtm.qtm_ip}..."
+        )
 
         return self
 
@@ -60,11 +58,9 @@ class QualisysTraqr(Thread):
         """
         Exit QualisysTraqr context
         """
-        print(
-            f'[TRAQR {self.traqr_body_name}] Exiting...')
+        print(f"[TRAQR {self.traqr_body_name}] Exiting...")
         if exc_type is not None:
-            print(
-                f'[TRAQR {self.traqr_body_name}] Encountered exception on exit...')
+            print(f"[TRAQR {self.traqr_body_name}] Encountered exception on exit...")
             traceback.print_exception(exc_type, exc_value, tb)
         self.qtm.close()
 

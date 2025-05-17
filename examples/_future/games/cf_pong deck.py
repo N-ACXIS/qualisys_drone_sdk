@@ -5,19 +5,19 @@ UNSTABLE / EXPERIMENTAL / UNDER DEVELOPMENT
 """
 
 import math
-import pynput
 from time import sleep, time
+
+import pynput
 
 from qfly import ParallelContexts, Pose, QualisysCrazyflie, QualisysDeck, World
 
-
 # SETTINGS
-cf_body_name = 'E7E7E7E706'
-cf_uri = 'radio://0/80/2M/E7E7E7E706'
+cf_body_name = "E7E7E7E706"
+cf_uri = "radio://0/80/2M/E7E7E7E706"
 cf_marker_ids = [41, 62, 63, 64]
 
-deck_body_name = 'E7E7E7E7E7'
-deck_uri = 'radio://0/80/2M/E7E7E7E7E7'
+deck_body_name = "E7E7E7E7E7"
+deck_uri = "radio://0/80/2M/E7E7E7E7E7"
 deck_marker_ids = [1, 2, 3, 4]
 
 # Watch key presses with a global variable
@@ -48,14 +48,9 @@ bounce_angle_max = 1.5  # in radians
 
 
 # Stack up context managers
-qcf = QualisysCrazyflie(cf_body_name,
-                        cf_uri,
-                        world,
-                        marker_ids=cf_marker_ids)
+qcf = QualisysCrazyflie(cf_body_name, cf_uri, world, marker_ids=cf_marker_ids)
 
-deck = QualisysDeck(deck_body_name,
-                    deck_uri,
-                    deck_marker_ids)
+deck = QualisysDeck(deck_body_name, deck_uri, deck_marker_ids)
 
 with ParallelContexts(*[qcf, deck]):
 
@@ -66,7 +61,7 @@ with ParallelContexts(*[qcf, deck]):
     dt = 0
 
     # MAIN LOOP WITH SAFETY CHECK
-    while(qcf.is_safe()):
+    while qcf.is_safe():
 
         # Mind the clock
         dt = time() - t
@@ -74,7 +69,7 @@ with ParallelContexts(*[qcf, deck]):
         # Terminate upon Esc command
         if last_key_pressed == pynput.keyboard.Key.esc:
             break
-        
+
         if dt < 5:
             qcf.rise_in_place()
             continue

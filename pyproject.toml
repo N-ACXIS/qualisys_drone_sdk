@@ -6,8 +6,11 @@ readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
     "cflib>=0.1.28",
+    "omegaconf>=2.3.0",
+    "pydantic>=2.11.4",
     "pynput>=1.8.1",
     "qtm>=2.1.2",
+    "requests>=2.32.3",
 ]
 
 [build-system]
@@ -17,3 +20,9 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["qfly"]
+
+[dependency-groups]
+dev = [
+    "black>=25.1.0",
+    "isort>=6.0.1",
+]

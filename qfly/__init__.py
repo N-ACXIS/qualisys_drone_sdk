@@ -13,8 +13,8 @@
 
 from .crazyflie import QualisysCrazyflie
 from .deck import QualisysDeck
+from .parallel_contexts import ParallelContexts
 from .pose import Pose
 from .qtm import QtmWrapper
 from .traqr import QualisysTraqr
 from .world import World
-from .parallel_contexts import ParallelContexts

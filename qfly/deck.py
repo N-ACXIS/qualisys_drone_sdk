@@ -1,5 +1,5 @@
-from threading import Thread
 import traceback
+from threading import Thread
 
 import cflib.crtp
 from cflib.crazyflie import Crazyflie
@@ -23,11 +23,9 @@ class QualisysDeck(Thread):
         Pose object keeping track of whereabouts
     """
 
-    def __init__(self,
-                 cf_body_name,
-                 cf_uri,
-                 marker_ids=[1, 2, 3, 4],
-                 qtm_ip="127.0.0.1"):
+    def __init__(
+        self, cf_body_name, cf_uri, marker_ids=[1, 2, 3, 4], qtm_ip="127.0.0.1"
+    ):
         """
         Construct QualisysDeck object
 
@@ -44,7 +42,7 @@ class QualisysDeck(Thread):
             in order of front, right, back, left
         """
 
-        print(f'[{cf_body_name}@{cf_uri}] Initializing...')
+        print(f"[{cf_body_name}@{cf_uri}] Initializing...")
 
         cflib.crtp.init_drivers()
 
@@ -60,7 +58,7 @@ class QualisysDeck(Thread):
         self.cf = Crazyflie(ro_cache=None, rw_cache=None)
         self.scf = SyncCrazyflie(self.cf_uri, cf=self.cf)
 
-        print(f'[{self.cf_body_name}@{self.cf_uri}] Connecting...')
+        print(f"[{self.cf_body_name}@{self.cf_uri}] Connecting...")
 
     def __enter__(self):
         """
@@ -69,26 +67,27 @@ class QualisysDeck(Thread):
 
         self.scf.open_link()
 
-        print(f'[{self.cf_body_name}@{self.cf_uri}] Connected...')
+        print(f"[{self.cf_body_name}@{self.cf_uri}] Connected...")
 
         # Set active marker IDs
         print(
-            f'[{self.cf_body_name}@{self.cf_uri}] Setting active marker IDs: {self.marker_ids}')
-        self.cf.param.set_value('activeMarker.front', self.marker_ids[0])
-        self.cf.param.set_value('activeMarker.right', self.marker_ids[1])
-        self.cf.param.set_value('activeMarker.back', self.marker_ids[2])
-        self.cf.param.set_value('activeMarker.left', self.marker_ids[3])
+            f"[{self.cf_body_name}@{self.cf_uri}] Setting active marker IDs: {self.marker_ids}"
+        )
+        self.cf.param.set_value("activeMarker.front", self.marker_ids[0])
+        self.cf.param.set_value("activeMarker.right", self.marker_ids[1])
+        self.cf.param.set_value("activeMarker.back", self.marker_ids[2])
+        self.cf.param.set_value("activeMarker.left", self.marker_ids[3])
 
         # Turn off LED to conserve battery
         self.set_led_ring(0)
 
         self.qtm = qfly.QtmWrapper(
-            self.cf_body_name,
-            lambda pose: self._set_pose(pose),
-            qtm_ip=self.qtm_ip)
+            self.cf_body_name, lambda pose: self._set_pose(pose), qtm_ip=self.qtm_ip
+        )
 
         print(
-            f'[{self.cf_body_name}@{self.cf_uri}] Connecting to QTM at {self.qtm.qtm_ip}...')
+            f"[{self.cf_body_name}@{self.cf_uri}] Connecting to QTM at {self.qtm.qtm_ip}..."
+        )
 
         return self
 
@@ -96,11 +95,11 @@ class QualisysDeck(Thread):
         """
         Exit QualisysCrazyflie context
         """
-        print(
-            f'[{self.cf_body_name}@{self.cf_uri}] Exiting...')
+        print(f"[{self.cf_body_name}@{self.cf_uri}] Exiting...")
         if exc_type is not None:
             print(
-                f'[{self.cf_body_name}@{self.cf_uri}] Encountered exception on exit...')
+                f"[{self.cf_body_name}@{self.cf_uri}] Encountered exception on exit..."
+            )
             traceback.print_exception(exc_type, exc_value, tb)
         self.qtm.close()
         self.scf.close_link()
@@ -115,7 +114,7 @@ class QualisysDeck(Thread):
             LED ring effect ID. See Bitcraze documentation:
             https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/api/params/#ring
         """
-        self.cf.param.set_value('ring.effect', val)
+        self.cf.param.set_value("ring.effect", val)
 
     def _set_pose(self, pose):
         """

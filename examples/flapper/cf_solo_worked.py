@@ -9,6 +9,7 @@ import json
 from time import sleep, time
 
 import pynput
+
 from qfly import Pose, QualisysCrazyflie, World, utils
 
 # SETTINGS
@@ -90,7 +91,6 @@ with QualisysCrazyflie(
             # Engage
             qcf.safe_position_setpoint(target)
 
-        
         """
             break
         # Back to center

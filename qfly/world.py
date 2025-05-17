@@ -6,13 +6,14 @@ class World:
     Hold safety-critical information about the physical world.
     """
 
-    def __init__(self,
-                 origin=Pose(0, 0, 0),  # x, y, z in m
-                 expanse=1.0,  # in m
-                 padding=0.15,  # in m
-                 speed_limit=0.5,  # in m/s
-                 tracking_tolerance=100  # in frames
-                 ):
+    def __init__(
+        self,
+        origin=Pose(0, 0, 0),  # x, y, z in m
+        expanse=1.0,  # in m
+        padding=0.15,  # in m
+        speed_limit=0.5,  # in m/s
+        tracking_tolerance=100,  # in frames
+    ):
         """
         Construct World object
 
@@ -27,7 +28,7 @@ class World:
             Safety tolerance at expanse boundary.
             (Unit: m)
         speed_limit : float
-            Max allowed airspeed in horizontal (xy) 
+            Max allowed airspeed in horizontal (xy)
             and vertical (z) dimensions.
             (Unit: m/s)
         tracking_tolerance : int

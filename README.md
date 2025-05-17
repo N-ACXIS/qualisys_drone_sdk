@@ -19,6 +19,16 @@
 - please update this README.md if you modified any code in this repository because we cannot use issues for forked repositories.
 - if you created a new code to control flappers or crazyflies, please add the codes in the ```example``` folder.
 ---original README.md---
+
+## Port-Forwarding
+If you want to use API to control flapper/crazyflie using the workstation, run the following command.
+(Replace the port number 8000 with the port you want to use.)
+```
+ssh -L 8000:localhost:8000 <UID>@172.22.224.93
+```
+
+It connects local (e.g. laptop in flightlab) PORT 8000 to remote (e.g. workstation) PORT 8000.
+
 # Qualisys Drone SDK
 
 qfly | Qualisys Drone SDK is a Python library to track and fly drones with [Qualisys motion capture systems](https://qualisys.com/). It is designed to be an entry point for students, researchers, engineers, artists, and designers to develop drone applications. 

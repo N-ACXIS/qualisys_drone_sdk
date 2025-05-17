@@ -1,4 +1,3 @@
-
 """
 qfly | Qualisys Drone SDK Example Script: Interactive Crazyflie with Traqr
 
@@ -9,25 +8,25 @@ rigid body.
 ESC to land at any time.
 """
 
-import pynput
 from time import sleep, time
 
-from qfly import Pose, QualisysCrazyflie, QualisysTraqr, World, parallel_contexts, utils
-
 import numpy as np
+import pynput
+
+from qfly import Pose, QualisysCrazyflie, QualisysTraqr, World, parallel_contexts, utils
 
 # SETTINGS
 # QTM rigid body names
 cf_body_names = [
-    'E7E7E7E701',
-    'E7E7E7E702',
+    "E7E7E7E701",
+    "E7E7E7E702",
     # 'E7E7E7E703',
     # 'E7E7E7E704',
 ]
 # Crazyflie addresses
 cf_uris = [
-    'radio://0/80/2M/E7E7E7E701',
-    'radio://0/80/2M/E7E7E7E702',
+    "radio://0/80/2M/E7E7E7E701",
+    "radio://0/80/2M/E7E7E7E702",
     # 'radio://0/80/2M/E7E7E7E703',
     # 'radio://0/80/2M/E7E7E7E704',
 ]
@@ -42,7 +41,7 @@ cf_marker_ids = [
 
 # Traqr
 traqr_body_name = "10261"
-    
+
 
 # Watch key presses with a global variable
 last_key_pressed = None
@@ -64,12 +63,10 @@ listener.start()
 world = World(expanse=1)
 
 # Stack up context managers
-_qcfs = [QualisysCrazyflie(cf_body_name,
-                           cf_uri,
-                           world,
-                           marker_ids=cf_marker_id)
-         for cf_body_name, cf_uri, cf_marker_id
-         in zip(cf_body_names, cf_uris, cf_marker_ids)]
+_qcfs = [
+    QualisysCrazyflie(cf_body_name, cf_uri, world, marker_ids=cf_marker_id)
+    for cf_body_name, cf_uri, cf_marker_id in zip(cf_body_names, cf_uris, cf_marker_ids)
+]
 
 with QualisysTraqr(traqr_body_name) as traqr:
     with parallel_contexts(*_qcfs) as qcfs:
@@ -81,7 +78,7 @@ with QualisysTraqr(traqr_body_name) as traqr:
         print("Beginning maneuvers...")
 
         # MAIN LOOP WITH SAFETY CHECK
-        while(all(qcf.is_safe() for qcf in qcfs)):
+        while all(qcf.is_safe() for qcf in qcfs):
 
             # Land with Esc
             if last_key_pressed == pynput.keyboard.Key.esc:
@@ -104,16 +101,17 @@ with QualisysTraqr(traqr_body_name) as traqr:
                 # Take off and hover in the center of safe airspace
                 if dt < 5:
                     qcf.set_led_ring(1)
-                    print(f'[t={int(dt)}] Maneuvering - Center...')
+                    print(f"[t={int(dt)}] Maneuvering - Center...")
                     # Set target
-                    x = np.interp(idx,
-                                  [0,
-                                   len(qcfs) - 1],
-                                  [world.origin.x - world.expanse * 0.8,
-                                   world.origin.x + world.expanse * 0.8])
-                    target = Pose(x,
-                                  world.origin.y,
-                                  world.expanse)
+                    x = np.interp(
+                        idx,
+                        [0, len(qcfs) - 1],
+                        [
+                            world.origin.x - world.expanse * 0.8,
+                            world.origin.x + world.expanse * 0.8,
+                        ],
+                    )
+                    target = Pose(x, world.origin.y, world.expanse)
                     # Engage
                     qcf.safe_position_setpoint(target)
 
@@ -121,21 +119,19 @@ with QualisysTraqr(traqr_body_name) as traqr:
 
                 # Move out half of the safe airspace in the X direction and circle around Z axis
                 else:
-                    print(f'[t={int(dt)}] Maneuvering - Circle around Z...')
+                    print(f"[t={int(dt)}] Maneuvering - Circle around Z...")
                     # Set target
                     phi = (dt * 90) % 360  # Calculate angle based on time
                     # Offset angle based on array
                     phi = phi + 360 * (idx / len(qcfs))
                     _x, _y = utils.pol2cart(0.75, phi)
-                    target = Pose(world.origin.x + _x,
-                                  world.origin.y + _y,
-                                  z)
+                    target = Pose(world.origin.x + _x, world.origin.y + _y, z)
                     print("TARGET ANGLE FOR " + str(idx) + " => " + str(phi))
                     # Engage
                     qcf.safe_position_setpoint(target)
                     sleep(0.02)
 
         # Land calmly
-        while(any(qcf.pose.z > 0.1 for qcf in qcfs)):
+        while any(qcf.pose.z > 0.1 for qcf in qcfs):
             for qcf in qcfs:
                 qcf.descend()

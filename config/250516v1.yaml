@@ -1,0 +1,6 @@
+output_plot_path: "output/tracking_plot_250516v1.png"
+radius: 0.5
+omega: 10 # deg/s
+tracking_sec: 40
+takeoff_sec: 5 
+trajectory_type: "XY2Z"

@@ -1,4 +1,3 @@
-
 """
 qfly | Qualisys Drone SDK Example Script: Interactive Crazyflie with Deck
 
@@ -8,18 +7,18 @@ Active Marker Deck.
 ESC to land at any time.
 """
 
-import pynput
 from time import sleep
+
+import pynput
 
 from qfly import ParallelContexts, Pose, QualisysCrazyflie, QualisysDeck, World
 
-
 # SETTINGS
-cf_body_name = 'E7E7E7E701'  # QTM rigid body name
-cf_uri = 'radio://0/80/2M/E7E7E7E701'  # Crazyflie address
+cf_body_name = "E7E7E7E701"  # QTM rigid body name
+cf_uri = "radio://0/80/2M/E7E7E7E701"  # Crazyflie address
 cf_marker_ids = [11, 12, 13, 14]
-deck_body_name = 'E7E7E7E7E7'
-deck_uri = 'radio://0/80/2M/E7E7E7E7E7'
+deck_body_name = "E7E7E7E7E7"
+deck_uri = "radio://0/80/2M/E7E7E7E7E7"
 deck_marker_ids = [1, 2, 3, 4]
 
 
@@ -45,21 +44,16 @@ listener.start()
 world = World()
 
 # Stack up context managers
-qcf = QualisysCrazyflie(cf_body_name,
-                        cf_uri,
-                        world,
-                        marker_ids=cf_marker_ids)
+qcf = QualisysCrazyflie(cf_body_name, cf_uri, world, marker_ids=cf_marker_ids)
 
-deck = QualisysDeck(deck_body_name,
-                    deck_uri,
-                    deck_marker_ids)
+deck = QualisysDeck(deck_body_name, deck_uri, deck_marker_ids)
 
 with ParallelContexts(*[qcf, deck]):
 
     print("Beginning maneuvers...")
 
     # MAIN LOOP WITH SAFETY CHECK
-    while(qcf.is_safe()):
+    while qcf.is_safe():
 
         # Terminate upon Esc command
         if last_key_pressed == pynput.keyboard.Key.esc:

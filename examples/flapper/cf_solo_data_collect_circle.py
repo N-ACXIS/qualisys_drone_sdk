@@ -7,27 +7,30 @@ ESC to land at any time.
 
 import json
 from datetime import datetime
+from functools import partial
 from time import sleep, time
-from cflib.crazyflie.log import LogConfig
-from cflib.crazyflie.syncLogger import SyncLogger
+
 import numpy as np
 import pynput
+from cflib.crazyflie.log import LogConfig
+from cflib.crazyflie.syncLogger import SyncLogger
+
 from qfly import Pose, QualisysCrazyflie, World, utils
-from functools import partial
 
 # SETTINGS
 cf_body_name = "flapper"  # QTM rigid body name
 cf_uri = "radio://0/80/2M/E7E7E7E7E7"  # Crazyflie address
 cf_marker_ids = [1, 2, 3, 4]  # Active marker IDs
 circle_radius = 0.75  # Radius of the circular flight path
-circle_axis = 'XYZ' # Axis to circle around: 'X' or 'Y' or 'Z' or 'XYZ'
+circle_axis = "XYZ"  # Axis to circle around: 'X' or 'Y' or 'Z' or 'XYZ'
 circle_speed_factor = 9  # How fast the Crazyflie should move along circle [degree/s]
 qtm_ip = "128.174.245.190"
 
-sampling_rate = 0.1 # sec
+sampling_rate = 0.1  # sec
 
 # Watch key presses with a global variable
 last_key_pressed = None
+
 
 # Set up keyboard callback
 def on_press(key):
@@ -37,9 +40,11 @@ def on_press(key):
     if key == pynput.keyboard.Key.esc:
         fly = False
 
+
 def log_callback(timestamp, data, logconf, data_log, key):
     print(f"{timestamp}, {data}, {logconf.name}")
     data_log[key].append(data)
+
 
 # Listen to the keyboard
 listener = pynput.keyboard.Listener(on_press=on_press)
@@ -49,72 +54,85 @@ listener.start()
 world = World(expanse=1.8, speed_limit=1.1)
 
 # Set up the asynchronous log configuration
-# For details, see https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/api/logs/ 
+# For details, see https://www.bitcraze.io/documentation/repository/crazyflie-firmware/master/api/logs/
 conf_list = []
-group_list = ["stabilizer", "pos", "vel", "acc", "attitude_rate", "motor", "motor_req", "gyro",
-              "target_pos", "target_vel", "controller_cmd", "controller_attitude", "controller_attitude_rate"]
+group_list = [
+    "stabilizer",
+    "pos",
+    "vel",
+    "acc",
+    "attitude_rate",
+    "motor",
+    "motor_req",
+    "gyro",
+    "target_pos",
+    "target_vel",
+    "controller_cmd",
+    "controller_attitude",
+    "controller_attitude_rate",
+]
 for group in group_list:
-    logconf = LogConfig(name=group, period_in_ms=sampling_rate*1000)
+    logconf = LogConfig(name=group, period_in_ms=sampling_rate * 1000)
     if group == "stabilizer":
-        logconf.add_variable('stabilizer.roll', 'float') # Same as stateEstimate.roll
-        logconf.add_variable('stabilizer.pitch', 'float') # Same as stateEstimate.pitch
-        logconf.add_variable('stabilizer.yaw', 'float') # Same as stateEstimate.yaw
-        logconf.add_variable('stabilizer.thrust', 'float') # Current thrust
+        logconf.add_variable("stabilizer.roll", "float")  # Same as stateEstimate.roll
+        logconf.add_variable("stabilizer.pitch", "float")  # Same as stateEstimate.pitch
+        logconf.add_variable("stabilizer.yaw", "float")  # Same as stateEstimate.yaw
+        logconf.add_variable("stabilizer.thrust", "float")  # Current thrust
     if group == "pos":
-        logconf.add_variable('stateEstimate.x', 'float')
-        logconf.add_variable('stateEstimate.y', 'float')
-        logconf.add_variable('stateEstimate.z', 'float')
+        logconf.add_variable("stateEstimate.x", "float")
+        logconf.add_variable("stateEstimate.y", "float")
+        logconf.add_variable("stateEstimate.z", "float")
     if group == "vel":
-        logconf.add_variable('stateEstimate.vx', 'float')
-        logconf.add_variable('stateEstimate.vy', 'float')
-        logconf.add_variable('stateEstimate.vz', 'float')
+        logconf.add_variable("stateEstimate.vx", "float")
+        logconf.add_variable("stateEstimate.vy", "float")
+        logconf.add_variable("stateEstimate.vz", "float")
     if group == "acc":
-        logconf.add_variable('stateEstimate.ax', 'float')
-        logconf.add_variable('stateEstimate.ay', 'float')
-        logconf.add_variable('stateEstimate.az', 'float')
+        logconf.add_variable("stateEstimate.ax", "float")
+        logconf.add_variable("stateEstimate.ay", "float")
+        logconf.add_variable("stateEstimate.az", "float")
     if group == "attitude_rate":
-        logconf.add_variable('stateEstimateZ.rateRoll', 'float')
-        logconf.add_variable('stateEstimateZ.ratePitch', 'float')
-        logconf.add_variable('stateEstimateZ.rateYaw', 'float')
-    if group == "motor":    
-        logconf.add_variable('motor.m1', 'float')
-        logconf.add_variable('motor.m2', 'float')
-        logconf.add_variable('motor.m3', 'float')
-        logconf.add_variable('motor.m4', 'float')
+        logconf.add_variable("stateEstimateZ.rateRoll", "float")
+        logconf.add_variable("stateEstimateZ.ratePitch", "float")
+        logconf.add_variable("stateEstimateZ.rateYaw", "float")
+    if group == "motor":
+        logconf.add_variable("motor.m1", "float")
+        logconf.add_variable("motor.m2", "float")
+        logconf.add_variable("motor.m3", "float")
+        logconf.add_variable("motor.m4", "float")
     if group == "motor_req":
-        logconf.add_variable('motor.m1req', 'float')
-        logconf.add_variable('motor.m2req', 'float')
-        logconf.add_variable('motor.m3req', 'float')
-        logconf.add_variable('motor.m4req', 'float')
+        logconf.add_variable("motor.m1req", "float")
+        logconf.add_variable("motor.m2req", "float")
+        logconf.add_variable("motor.m3req", "float")
+        logconf.add_variable("motor.m4req", "float")
     if group == "gyro":
-        logconf.add_variable('gyro.x', 'float')
-        logconf.add_variable('gyro.y', 'float')
-        logconf.add_variable('gyro.z', 'float')
+        logconf.add_variable("gyro.x", "float")
+        logconf.add_variable("gyro.y", "float")
+        logconf.add_variable("gyro.z", "float")
     if group == "target_pos":
-        logconf.add_variable('ctrltarget.x', 'float')
-        logconf.add_variable('ctrltarget.y', 'float')
-        logconf.add_variable('ctrltarget.z', 'float')
+        logconf.add_variable("ctrltarget.x", "float")
+        logconf.add_variable("ctrltarget.y", "float")
+        logconf.add_variable("ctrltarget.z", "float")
     if group == "target_vel":
-        logconf.add_variable('ctrltarget.vx', 'float')
-        logconf.add_variable('ctrltarget.vy', 'float')
-        logconf.add_variable('ctrltarget.vz', 'float')
-    #if group == "target_attitude":
+        logconf.add_variable("ctrltarget.vx", "float")
+        logconf.add_variable("ctrltarget.vy", "float")
+        logconf.add_variable("ctrltarget.vz", "float")
+    # if group == "target_attitude":
     #    logconf.add_variable('ctrltarget.roll', 'float')
     #    logconf.add_variable('ctrltarget.pitch', 'float')
     #    logconf.add_variable('ctrltarget.yaw', 'float')
     if group == "controller_cmd":
-        logconf.add_variable('controller.cmd_thrust', 'float')
-        logconf.add_variable('controller.cmd_roll', 'float')
-        logconf.add_variable('controller.cmd_pitch', 'float')
-        logconf.add_variable('controller.cmd_yaw', 'float')
+        logconf.add_variable("controller.cmd_thrust", "float")
+        logconf.add_variable("controller.cmd_roll", "float")
+        logconf.add_variable("controller.cmd_pitch", "float")
+        logconf.add_variable("controller.cmd_yaw", "float")
     if group == "controller_attitude":
-        logconf.add_variable('controller.roll', 'float')
-        logconf.add_variable('controller.pitch', 'float')
-        logconf.add_variable('controller.yaw', 'float')
+        logconf.add_variable("controller.roll", "float")
+        logconf.add_variable("controller.pitch", "float")
+        logconf.add_variable("controller.yaw", "float")
     if group == "controller_attitude_rate":
-        logconf.add_variable('controller.rollRate', 'float')
-        logconf.add_variable('controller.pitchRate', 'float')
-        logconf.add_variable('controller.yawRate', 'float')
+        logconf.add_variable("controller.rollRate", "float")
+        logconf.add_variable("controller.pitchRate", "float")
+        logconf.add_variable("controller.yawRate", "float")
     conf_list.append(logconf)
 
 # Prepare for liftoff
@@ -131,7 +149,7 @@ with QualisysCrazyflie(
     ## PID Controllers ##############################################################
     # The following controllers are ordered from the low-level to high-level
     # TODO: To set the PID gains, use cfclient (see link below) instead of using the code
-    # https://www.bitcraze.io/documentation/repository/crazyflie-clients-python/master/userguides/userguide_client/tuning_tab/ 
+    # https://www.bitcraze.io/documentation/repository/crazyflie-clients-python/master/userguides/userguide_client/tuning_tab/
     # 1. Set PID attitude rate gains
     """
     # roll
@@ -195,49 +213,49 @@ with QualisysCrazyflie(
     # Log PID gains
     pid_gains = {
         "pid_rate": {
-            "roll_kp": qcf.cf.param.get_value('pid_rate.roll_kp'),
-            "roll_ki": qcf.cf.param.get_value('pid_rate.roll_ki'),
-            "roll_kd": qcf.cf.param.get_value('pid_rate.roll_kd'),
-            "pitch_kp": qcf.cf.param.get_value('pid_rate.pitch_kp'),
-            "pitch_ki": qcf.cf.param.get_value('pid_rate.pitch_ki'),
-            "pitch_kd": qcf.cf.param.get_value('pid_rate.pitch_kd'),
-            "yaw_kp": qcf.cf.param.get_value('pid_rate.yaw_kp'),
-            "yaw_ki": qcf.cf.param.get_value('pid_rate.yaw_ki'),
-            "yaw_kd": qcf.cf.param.get_value('pid_rate.yaw_kd')
+            "roll_kp": qcf.cf.param.get_value("pid_rate.roll_kp"),
+            "roll_ki": qcf.cf.param.get_value("pid_rate.roll_ki"),
+            "roll_kd": qcf.cf.param.get_value("pid_rate.roll_kd"),
+            "pitch_kp": qcf.cf.param.get_value("pid_rate.pitch_kp"),
+            "pitch_ki": qcf.cf.param.get_value("pid_rate.pitch_ki"),
+            "pitch_kd": qcf.cf.param.get_value("pid_rate.pitch_kd"),
+            "yaw_kp": qcf.cf.param.get_value("pid_rate.yaw_kp"),
+            "yaw_ki": qcf.cf.param.get_value("pid_rate.yaw_ki"),
+            "yaw_kd": qcf.cf.param.get_value("pid_rate.yaw_kd"),
         },
         "pid_attitude": {
-            "roll_kp": qcf.cf.param.get_value('pid_attitude.roll_kp'),
-            "roll_ki": qcf.cf.param.get_value('pid_attitude.roll_ki'),
-            "roll_kd": qcf.cf.param.get_value('pid_attitude.roll_kd'),
-            "pitch_kp": qcf.cf.param.get_value('pid_attitude.pitch_kp'),
-            "pitch_ki": qcf.cf.param.get_value('pid_attitude.pitch_ki'),
-            "pitch_kd": qcf.cf.param.get_value('pid_attitude.pitch_kd'),
-            "yaw_kp": qcf.cf.param.get_value('pid_attitude.yaw_kp'),
-            "yaw_ki": qcf.cf.param.get_value('pid_attitude.yaw_ki'),
-            "yaw_kd": qcf.cf.param.get_value('pid_attitude.yaw_kd')
+            "roll_kp": qcf.cf.param.get_value("pid_attitude.roll_kp"),
+            "roll_ki": qcf.cf.param.get_value("pid_attitude.roll_ki"),
+            "roll_kd": qcf.cf.param.get_value("pid_attitude.roll_kd"),
+            "pitch_kp": qcf.cf.param.get_value("pid_attitude.pitch_kp"),
+            "pitch_ki": qcf.cf.param.get_value("pid_attitude.pitch_ki"),
+            "pitch_kd": qcf.cf.param.get_value("pid_attitude.pitch_kd"),
+            "yaw_kp": qcf.cf.param.get_value("pid_attitude.yaw_kp"),
+            "yaw_ki": qcf.cf.param.get_value("pid_attitude.yaw_ki"),
+            "yaw_kd": qcf.cf.param.get_value("pid_attitude.yaw_kd"),
         },
         "velCtlPid": {
-            "vxKp": qcf.cf.param.get_value('velCtlPid.vxKp'),
-            "vxKi": qcf.cf.param.get_value('velCtlPid.vxKi'),
-            "vxKd": qcf.cf.param.get_value('velCtlPid.vxKd'),
-            "vyKp": qcf.cf.param.get_value('velCtlPid.vyKp'),
-            "vyKi": qcf.cf.param.get_value('velCtlPid.vyKi'),
-            "vyKd": qcf.cf.param.get_value('velCtlPid.vyKd'),
-            "vzKp": qcf.cf.param.get_value('velCtlPid.vzKp'),
-            "vzKi": qcf.cf.param.get_value('velCtlPid.vzKi'),
-            "vzKd": qcf.cf.param.get_value('velCtlPid.vzKd')
+            "vxKp": qcf.cf.param.get_value("velCtlPid.vxKp"),
+            "vxKi": qcf.cf.param.get_value("velCtlPid.vxKi"),
+            "vxKd": qcf.cf.param.get_value("velCtlPid.vxKd"),
+            "vyKp": qcf.cf.param.get_value("velCtlPid.vyKp"),
+            "vyKi": qcf.cf.param.get_value("velCtlPid.vyKi"),
+            "vyKd": qcf.cf.param.get_value("velCtlPid.vyKd"),
+            "vzKp": qcf.cf.param.get_value("velCtlPid.vzKp"),
+            "vzKi": qcf.cf.param.get_value("velCtlPid.vzKi"),
+            "vzKd": qcf.cf.param.get_value("velCtlPid.vzKd"),
         },
         "posCtlPid": {
-            "xKp": qcf.cf.param.get_value('posCtlPid.xKp'),
-            "xKi": qcf.cf.param.get_value('posCtlPid.xKi'),
-            "xKd": qcf.cf.param.get_value('posCtlPid.xKd'),
-            "yKp": qcf.cf.param.get_value('posCtlPid.yKp'),
-            "yKi": qcf.cf.param.get_value('posCtlPid.yKi'),
-            "yKd": qcf.cf.param.get_value('posCtlPid.yKd'),
-            "zKp": qcf.cf.param.get_value('posCtlPid.zKp'),
-            "zKi": qcf.cf.param.get_value('posCtlPid.zKi'),
-            "zKd": qcf.cf.param.get_value('posCtlPid.zKd')
-        }
+            "xKp": qcf.cf.param.get_value("posCtlPid.xKp"),
+            "xKi": qcf.cf.param.get_value("posCtlPid.xKi"),
+            "xKd": qcf.cf.param.get_value("posCtlPid.xKd"),
+            "yKp": qcf.cf.param.get_value("posCtlPid.yKp"),
+            "yKi": qcf.cf.param.get_value("posCtlPid.yKi"),
+            "yKd": qcf.cf.param.get_value("posCtlPid.yKd"),
+            "zKp": qcf.cf.param.get_value("posCtlPid.zKp"),
+            "zKi": qcf.cf.param.get_value("posCtlPid.zKi"),
+            "zKd": qcf.cf.param.get_value("posCtlPid.zKd"),
+        },
     }
     ############################################################################
 
@@ -261,7 +279,7 @@ with QualisysCrazyflie(
         callback = partial(log_callback, data_log=data, key=group)
         logconf.data_received_cb.add_callback(callback)
         logconf.start()
-    
+
     # MAIN LOOP WITH SAFETY CHECK
     while qcf.is_safe():
 
@@ -284,36 +302,40 @@ with QualisysCrazyflie(
             qcf.safe_position_setpoint(target)
 
         elif dt < 65:
-            if circle_axis == 'Z':
-                print(f'[t={int(dt)}] Maneuvering - Circle around Z')
+            if circle_axis == "Z":
+                print(f"[t={int(dt)}] Maneuvering - Circle around Z")
                 # Set target
                 _x, _y = utils.pol2cart(circle_radius, phi)
-                target = Pose(world.origin.x + _x, world.origin.y + _y, 1.0, yaw = 90 + phi)
+                target = Pose(
+                    world.origin.x + _x, world.origin.y + _y, 1.0, yaw=90 + phi
+                )
                 # Engage
                 qcf.safe_position_setpoint(target)
-            elif circle_axis == 'Y':
-                print(f'[t={int(dt)}] Maneuvering - Circle around Y')
+            elif circle_axis == "Y":
+                print(f"[t={int(dt)}] Maneuvering - Circle around Y")
                 # Set target
                 _x, _z = utils.pol2cart(circle_radius, phi)
-                target = Pose(world.origin.x + _x, world.origin.y, 0.95 + _z, yaw = 0)
+                target = Pose(world.origin.x + _x, world.origin.y, 0.95 + _z, yaw=0)
                 # Engage
                 qcf.safe_position_setpoint(target)
-            elif circle_axis == 'X':
-                print(f'[t={int(dt)}] Maneuvering - Circle around X')
+            elif circle_axis == "X":
+                print(f"[t={int(dt)}] Maneuvering - Circle around X")
                 # Set target
                 _y, _z = utils.pol2cart(circle_radius, phi)
-                target = Pose(world.origin.x, world.origin.y + _y, 0.8 + _z, yaw = 0)
+                target = Pose(world.origin.x, world.origin.y + _y, 0.8 + _z, yaw=0)
                 # Engage
                 qcf.safe_position_setpoint(target)
-            elif circle_axis == 'XYZ':
-                print(f'[t={int(dt)}] Maneuvering - Circle around XYZ')
+            elif circle_axis == "XYZ":
+                print(f"[t={int(dt)}] Maneuvering - Circle around XYZ")
                 # Set target
                 _, _z = utils.pol2cart(0.3, 4 * phi)
                 _x, _y = utils.pol2cart(circle_radius, phi)
-                target = Pose(world.origin.x + _x, world.origin.y + _y, 0.8 + _z, yaw = 90 + phi)
+                target = Pose(
+                    world.origin.x + _x, world.origin.y + _y, 0.8 + _z, yaw=90 + phi
+                )
                 # Engage
                 qcf.safe_position_setpoint(target)
-        
+
         # Back to center
         elif dt < 70:
             print(f"[t={dt}] Maneuvering - Center...")
@@ -321,10 +343,10 @@ with QualisysCrazyflie(
             target = Pose(world.origin.x, world.origin.y, 1.0)
             # Engage
             qcf.safe_position_setpoint(target)
-        
+
         else:
             break
-        
+
         if time() - last_saved_t > save_freq:
             data["pose"].append(
                 (
@@ -340,7 +362,7 @@ with QualisysCrazyflie(
             data["time"].append(time())
             data["control"].append((target.x, target.y, target.z))
             last_saved_t = time()
-        
+
         if not qcf.is_safe():
             print("not safe")
 
@@ -356,7 +378,11 @@ with QualisysCrazyflie(
         print(qcf.pose.z)
         print("landing...")
         cur_time = time()
-        target = Pose(world.origin.x, world.origin.y, max(-0.20, first_z * (1 - (cur_time - start_time) / landing_time)))
+        target = Pose(
+            world.origin.x,
+            world.origin.y,
+            max(-0.20, first_z * (1 - (cur_time - start_time) / landing_time)),
+        )
         qcf.safe_position_setpoint(target)
 
 # Get the current time in seconds since the epoch
@@ -364,5 +390,7 @@ current_time = time()
 
 # Convert the time to a human-readable format
 formatted_time = datetime.fromtimestamp(current_time).strftime("%Y%m%d%H%M%S")
-with open("circular_traj/circular_" + circle_axis + "_" + formatted_time + ".json", "w") as file:
+with open(
+    "circular_traj/circular_" + circle_axis + "_" + formatted_time + ".json", "w"
+) as file:
     json.dump(data, file, indent=4)

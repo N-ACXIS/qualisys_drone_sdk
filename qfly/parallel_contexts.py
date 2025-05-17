@@ -6,12 +6,10 @@ import sys
 import threading
 import traceback
 
-
 __all__ = ["MultipleError", "parallel"]
 
 
 class ParallelContexts(object):
-
     """Concurrently start and stop serveral context managers in different
     threads.
 
@@ -32,8 +30,7 @@ class ParallelContexts(object):
         threads = []
 
         for mgr in self.managers:
-            t = threading.Thread(target=run,
-                                 args=(mgr.__enter__, tuple(), errors))
+            t = threading.Thread(target=run, args=(mgr.__enter__, tuple(), errors))
             t.start()
             threads.append(t)
         for thread in threads:
@@ -50,8 +47,7 @@ class ParallelContexts(object):
         threads = []
 
         for mgr in self.managers:
-            t = threading.Thread(target=run,
-                                 args=(mgr.__exit__, exc_info, errors))
+            t = threading.Thread(target=run, args=(mgr.__exit__, exc_info, errors))
             t.start()
             threads.append(t)
 
@@ -63,7 +59,6 @@ class ParallelContexts(object):
 
 
 class MultipleError(Exception):
-
     """Exception class to collect several errors in a single object."""
 
     def __init__(self, errors):
@@ -78,9 +73,7 @@ class MultipleError(Exception):
 
 
 def run(func, args, errors):
-    """Helper for ``parallel``.
-
-    """
+    """Helper for ``parallel``."""
     try:
         func(*args)
     except:
