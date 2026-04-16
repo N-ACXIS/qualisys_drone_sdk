@@ -1,3 +1,5 @@
+# This SDK is old. The updated version can be found here (https://github.com/N-ACXIS/qualisys_drone_sdk).
+
 # Tips
 - Use Crazyradio PA for now
 - Qualisys codes do not work as they are
