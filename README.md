@@ -1,4 +1,4 @@
-# This SDK is old. The updated version can be found here (https://github.com/N-ACXIS/our_default_qualisys_sdk).
+# This SDK is old. The updated version can be found here (https://github.com/N-ACXIS/flightlab_qualisys_sdk).
 
 # Tips
 - Use Crazyradio PA for now
